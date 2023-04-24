@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+  font-family: "Open Sans", sans-serif;
+}
+
+.alert-error {
+  @apply bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative;
+}
+
+@layer components{
+    .form-auth-input-valid{
+      @apply h-7 border-solid border-gray-400 rounded-md border;
+    }
+    .form-auth-input-invalid{
+      @apply h-7 border-solid border-gray-400 rounded-md border-2 border-red-700;
+    }
+    .error-form{
+      @apply my-0.5 invisible peer-[.invalid]:visible text-red-700 text-sm;
+    }
+    .button-profile-form{
+        @apply text-white bg-stone-800 hover:bg-stone-950 rounded-lg transition ease-in duration-200 focus:outline-none;
+    }
+    .form-profile-input-display{
+        @apply h-7 border-0;
+    }
+}
