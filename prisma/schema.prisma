@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Adresse {
+  idAdresse    Int           @id @default(autoincrement())
+  numeroNomRue String
+  ville        String
+  complement   String?
+  codePostal   Int
+  pays         String
+  Commande     Commande[]
+  Utilisateur  Utilisateur[]
+}
+
+model Categorie {
+  idCategorie Int       @id @default(autoincrement())
+  libelle     String
+  description String
+  Produit     Produit[]
+}
+
+model Utilisateur {
+  idUtilisateur Int          @id @default(autoincrement())
+  nom           String
+  prenom        String
+  dateNaissance DateTime?    @db.Date
+  email         String       @unique
+  genre         String?
+  idAdresse     Int?
+  motDePasse    String
+  Abonnement    Abonnement[]
+  Commande      Commande[]
+  Contrat       Contrat[]
+  Livreur       Livreur?
+  Adresse       Adresse?     @relation(fields: [idAdresse], references: [idAdresse], onDelete: Cascade, onUpdate: NoAction)
+  Vendeur       Vendeur?
+}
+
+model Abonnement {
+  idAbonnement  Int         @id @default(autoincrement())
+  dateDebut     DateTime    @default(now()) @db.Date
+  dateFin       DateTime    @db.Date
+  idUtilisateur Int
+  Utilisateur   Utilisateur @relation(fields: [idUtilisateur], references: [idUtilisateur], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Contrat {
+  idContrat      Int             @id @default(autoincrement())
+  dateDebut      DateTime        @default(now()) @db.Date
+  dateFin        DateTime        @db.Date
+  idUtilisateur  Int
+  etat           Int
+  Utilisateur    Utilisateur     @relation(fields: [idUtilisateur], references: [idUtilisateur], onDelete: Cascade, onUpdate: NoAction)
+  ContratLivreur ContratLivreur?
+  ContratVendeur ContratVendeur?
+}
+
+model Vendeur {
+  idVendeur     Int         @id @default(autoincrement())
+  nbrVentes     Int?        @default(0)
+  benefices     Float?      @default(0) @db.Real
+  idUtilisateur Int         @unique
+  idEntreprise  Int?
+  Valide        Boolean     @default(false)
+  Produit       Produit[]
+  Entreprise    Entreprise? @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: Cascade, onUpdate: NoAction)
+  Utilisateur   Utilisateur @relation(fields: [idUtilisateur], references: [idUtilisateur], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Livreur {
+  idLivreur     Int         @id @default(autoincrement())
+  permis        Int
+  vehicule      Int
+  idUtilisateur Int         @unique
+  Valide        Boolean     @default(false)
+  Commande      Commande[]
+  Utilisateur   Utilisateur @relation(fields: [idUtilisateur], references: [idUtilisateur], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Commande {
+  idCommande     Int             @id @default(autoincrement())
+  dateCommande   DateTime?       @db.Date
+  dateLivraison  DateTime?       @db.Date
+  etatCommande   Int
+  idLivreur      Int?
+  idAdresse      Int?
+  idUtilisateur  Int
+  method_payment String?
+  Adresse        Adresse?        @relation(fields: [idAdresse], references: [idAdresse], onDelete: Cascade, onUpdate: NoAction)
+  Livreur        Livreur?        @relation(fields: [idLivreur], references: [idLivreur], onDelete: NoAction, onUpdate: NoAction)
+  Utilisateur    Utilisateur     @relation(fields: [idUtilisateur], references: [idUtilisateur], onDelete: NoAction, onUpdate: NoAction)
+  PanierProduit  PanierProduit[]
+}
+
+model ContratLivreur {
+  idContratLivreur   Int     @id @default(autoincrement())
+  entrepriseAffiliee String
+  idContrat          Int     @unique
+  Contrat            Contrat @relation(fields: [idContrat], references: [idContrat], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model ContratVendeur {
+  idContratVendeur Int     @id @default(autoincrement())
+  comission        Int
+  idContrat        Int     @unique
+  Contrat          Contrat @relation(fields: [idContrat], references: [idContrat], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model PanierProduit {
+  idPanierProduit Int      @id @default(autoincrement())
+  quantite        Int      @default(1)
+  idCommande      Int
+  idProduit       Int
+  Commande        Commande @relation(fields: [idCommande], references: [idCommande], onDelete: Cascade, onUpdate: NoAction)
+  Produit         Produit  @relation(fields: [idProduit], references: [idProduit], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Produit {
+  idProduit       Int             @id @default(autoincrement())
+  nom             String
+  description     String
+  stock           Int
+  delaisLivraison Int
+  prix            Float           @db.Real
+  reduction       Int?            @default(0)
+  hauteur         Float?          @db.Real
+  longueur        Float?          @db.Real
+  largeur         Float?          @db.Real
+  poids           Float?          @db.Real
+  idCategorie     Int?
+  idVendeur       Int
+  reference       String
+  image           String
+  PanierProduit   PanierProduit[]
+  Categorie       Categorie?      @relation(fields: [idCategorie], references: [idCategorie], onDelete: NoAction, onUpdate: NoAction)
+  Vendeur         Vendeur         @relation(fields: [idVendeur], references: [idVendeur], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Entreprise {
+  idEntreprise Int       @id @default(autoincrement())
+  nom          String    @unique
+  Vendeur      Vendeur[]
+}
