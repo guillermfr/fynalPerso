@@ -106,6 +106,8 @@ async function newCartData(product, commande, idUtilisateur) {
   }
 
 export default function Categorie({ catData }) {
+    
+    if(!catData) return null;
 
     // Récupération des cookies user
     const [cookies] = useCookies(["user"]);
