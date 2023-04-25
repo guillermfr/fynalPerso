@@ -86,6 +86,9 @@ async function newCartData(product, commande, idUtilisateur) {
 }
 
 export default function Products({ products }) {
+  
+  if(!products) return null;
+  
   const router = useRouter();
   // Récupération des cookies user
   const [cookies] = useCookies(["user"]);
